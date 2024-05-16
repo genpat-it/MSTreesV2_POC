@@ -171,15 +171,7 @@ class distance_matrix(object) :
         print(f"[info] harmonic method finished in {time.time() - int_time} seconds.")
         return weights
 
-    @staticmethod
-    def harmonic2(n_str) :
-        dist = np.memmap(params['dist_file'], dtype=params['dtype'], mode='r', shape=(params['rows'], params['rows']))
-        weights = dist.shape[0] / np.sum(1.0/(dist + 0.1), 1)
-        cw = np.vstack([-np.array(n_str), weights])
-        weights[np.lexsort(cw)] = np.arange(dist.shape[0], dtype=float)/dist.shape[0]
-        return weights
-    
-class methods(object) :
+class methods(object):
     @staticmethod
     def _asymmetric(weight, **params) :
         int_time = time.time()
