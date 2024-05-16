@@ -67,10 +67,40 @@ This script generates a dummy matrix of size 8000x4000, with a similarity percen
 
 ```bash
 $ python dummy_generator.py 80000 4000 5 8000x4000_5.tsv
-Dummy dataset with 80000 samples, 4000 columns, and 5% similarity saved to 8000x4000_5.tsv
+Dummy dataset with 80000 samples, 4000 columns, and 5% similarity saved to 80000x4000_5.tsv
 ```
 
-Run the script using the default `-p` pipeline:
+Execute the script with the default `-p` pipeline option, processing in chunks of 10000 rows at a time (`-c`), utilizing 120 cores (`-n`), with data type set to float16 (`-d`), and retaining the temporary files generated during the process (`-k`).
+
 ```bash
-$ /usr/bin/time -v python MSTreesV2.py -p 8000x4000_5.tsv -c 10000 -n 120 -d 16 -k
+$ /usr/bin/time -v python MSTreesV2.py -p 80000x4000_5.tsv -c 10000 -n 120 -d 16 -k
+
+#########################################################
+####       !!! DON'T USE IN PRODUCTION !!!       ########
+#########################################################
+[info] MSTreesV2 started at 2024-05-16 17:24:18.926149...
+#########################################################
+[info] 80000x4000_5.tsv has 80000 rows and 4000 columns.
+[info] The chunk size is set to 10000.
+[info] The profile file will be saved in /MSTrees_fork/github/tmp6zevps6_.prof.npy.
+[info] The names file will be saved in /MSTrees_fork/github/tmp6zevps6_.names.npy.
+[info] The distance file will be saved in /MSTrees_fork/github/tmp6zevps6_.dist.npy.
+[info] The distance file for edmonds will be saved in /MSTrees_fork/github/tmp6zevps6_.dist.list
+[info] The nwk file be saved in /MSTrees_fork/github/tmp6zevps6_.nwk
+[info] Processing 8000x4000_5.tsv in chunks...
+[info] Chunk 0 processed with shape (10000, 4000)
+[info] Chunk 1 processed with shape (10000, 4000)
+[info] Chunk 2 processed with shape (10000, 4000)
+[info] Chunk 3 processed with shape (10000, 4000)
+[info] Chunk 4 processed with shape (10000, 4000)
+[info] Chunk 5 processed with shape (10000, 4000)
+[info] Chunk 6 processed with shape (10000, 4000)
+[info] Chunk 7 processed with shape (10000, 4000)
+[info] Processing finished in 186.30022048950195 seconds.
+[info] nonredundant method started...
+[info] nonredundant method finished in 142.98293256759644 seconds.
+[info] New shape of profiles: (76001, 4000)
+[info] New shape of names: (76001,)
+[info] MSTree method started...
+[info] get_distance method started...
 ```
