@@ -64,7 +64,7 @@ options:
 ```
 
 ## Test
-This script generates a dummy matrix of size 8000x4000, with a similarity percentage of 5%. Each allele call is extracted from the same bin that belongs to the locus. Each locus can have up to 10 unique crc32 values.
+This script generates a dummy matrix of size 80000x4000, with a similarity percentage of 5%. Each allele call is extracted from the same bin that belongs to the locus. Each locus can have up to 10 unique crc32 values.
 
 ```bash
 $ python dummy_generator.py 80000 4000 5 80000x4000_5.tsv
@@ -104,4 +104,6 @@ $ /usr/bin/time -v python MSTreesV2.py -p 80000x4000_5.tsv -c 10000 -n 120 -d 16
 [info] New shape of names: (76001,)
 [info] MSTree method started...
 [info] get_distance method started...
+
+(to be continued)
 ```
