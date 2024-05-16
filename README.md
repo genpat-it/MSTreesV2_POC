@@ -15,8 +15,9 @@ This script is a proof of concept (POC) and is not intended for production use. 
 - **Optimized TSV Matrix Handling**: The key upgrade in this version is the optimized handling of large TSV matrix profiles, achieved through the '-p' option.
 
 ## Development Todos
-2. **Skip Phases**: Allow the script to skip phases when precomputed `.npy` files (e.g., profiles, names, or distance matrix) are passed.
-3. **Implement Remaining Functions**: Test and update the remaining functions from the original script.
+1. **Skip Phases**: Allow the script to skip phases when precomputed `.npy` files (e.g., profiles, names, or distance matrix) are passed.
+2. **Implement Remaining Functions**: Test and update the remaining functions from the original script.
+3. **Validate results**: Especially when float16 dtype is used.
 
 ## Original Script
 The original script can be found at:
