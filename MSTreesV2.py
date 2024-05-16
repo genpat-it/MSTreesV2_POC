@@ -428,7 +428,7 @@ def backend(**args) :
     print(f"[info] The names file will be saved in {params['names_file']}.")
     print(f"[info] The distance file will be saved in {params['dist_file']}.")
     print(f"[info] The distance file for edmonds will be saved in {params['tempfix']}.dist.list")
-    print(f"[info] The nwk file be saved in {params['nwk_file']}")
+    print(f"[info] The nwk file will be saved in {params['nwk_file']}")
         
     int_time = time.time()
     print(f"[info] Processing {params['profile']} in chunks...")
