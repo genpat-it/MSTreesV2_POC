@@ -1,6 +1,6 @@
 # MSTreesV2.py
 
-This script extracts only the methods used for the MSTreesV2 pipeline, which were originally implemented in the MSTree.py script.
+This script extracts only the methods used for the MSTreesV2 pipeline, which were originally implemented in the [MSTree.py](https://github.com/achtman-lab/GrapeTree/blob/master/module/MSTrees.py) script.
 
 The enhanced script introduces two key concepts: chunks and memory-mapped files (memmap).
 
