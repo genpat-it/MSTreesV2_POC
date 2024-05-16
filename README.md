@@ -19,6 +19,12 @@ This script is a proof of concept (POC) and is not intended for production use. 
 2. **Implement Remaining Functions**: Test and update the remaining functions from the original script.
 3. **Validate results**: Especially when float16 dtype is used.
 
+
+## Usage of float16 dtype
+* Utilizing float16 as the data type inhibits the just-in-time (JIT) compilation of the contemporary method.
+* The Newick tree (nwk) resulting from the use of float16 cannot be directly compared with the Newick tree obtained from the original script.
+* float16 reduces precision, especially in divisions and sorting operations, which may not be as precise.
+  
 ## Original Script
 The original script can be found at:
 - [MSTrees.py](https://github.com/achtman-lab/GrapeTree/blob/master/module/MSTrees.py)
@@ -88,7 +94,7 @@ $ /usr/bin/time -v python MSTreesV2.py -p 80000x4000_5.tsv -c 10000 -n 120 -d 16
 [info] The distance file will be saved in /MSTrees_fork/github/tmp6zevps6_.dist.npy.
 [info] The distance file for edmonds will be saved in /MSTrees_fork/github/tmp6zevps6_.dist.list
 [info] The nwk file be saved in /MSTrees_fork/github/tmp6zevps6_.nwk
-[info] Processing 8000x4000_5.tsv in chunks...
+[info] Processing 80000x4000_5.tsv in chunks...
 [info] Chunk 0 processed with shape (10000, 4000)
 [info] Chunk 1 processed with shape (10000, 4000)
 [info] Chunk 2 processed with shape (10000, 4000)
