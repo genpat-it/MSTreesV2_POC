@@ -79,9 +79,7 @@ $ python dummy_generator.py 80000 4000 20 30 80000x4000_30_20.tsv
 Execute the script with the default `-p` pipeline option, processing in chunks of 10000 rows at a time (`-c`), utilizing 120 cores (`-n`), with data type set to float16 (`-d`), and retaining the temporary files generated during the process (`-k`).
 
 ```bash
-$ /usr/bin/time -v python MSTreesV2.py -p 80000x4000_30_20.tsv -c 10000 -n 120 -d 16 -k
-
-(310) [a.deruvo@gtc-collab-int Thu May 16 23:42:24 github]$ /usr/bin/time -v python MSTreesV2.py -p 80000x4000_30_20.tsv -c 10000 -n 150 -d 32
+$ /usr/bin/time -v python MSTreesV2.py -p 80000x4000_30_20.tsv -c 10000 -n 150 -d 32
 #########################################################
 ####       !!! DON'T USE IN PRODUCTION !!!       ########
 #########################################################
@@ -89,11 +87,11 @@ $ /usr/bin/time -v python MSTreesV2.py -p 80000x4000_30_20.tsv -c 10000 -n 120 -
 #########################################################
 [info] 80000x4000_30_20.tsv has 80000 rows and 4000 columns.
 [info] The chunk size is set to 10000.
-[info] The profile file will be saved in /home/IZSNT/a.deruvo/MSTrees_fork/github/tmpvtqulnja.prof.npy.
-[info] The names file will be saved in /home/IZSNT/a.deruvo/MSTrees_fork/github/tmpvtqulnja.names.npy.
-[info] The distance file will be saved in /home/IZSNT/a.deruvo/MSTrees_fork/github/tmpvtqulnja.dist.npy.
-[info] The distance file for edmonds will be saved in /home/IZSNT/a.deruvo/MSTrees_fork/github/tmpvtqulnja.dist.list
-[info] The nwk file will be saved in /home/IZSNT/a.deruvo/MSTrees_fork/github/tmpvtqulnja.nwk
+[info] The profile file will be saved in /MSTrees_fork/github/tmpvtqulnja.prof.npy.
+[info] The names file will be saved in /MSTrees_fork/github/tmpvtqulnja.names.npy.
+[info] The distance file will be saved in /MSTrees_fork/github/tmpvtqulnja.dist.npy.
+[info] The distance file for edmonds will be saved in /MSTrees_fork/github/tmpvtqulnja.dist.list
+[info] The nwk file will be saved in /MSTrees_fork/github/tmpvtqulnja.nwk
 [info] Processing 80000x4000_30_20.tsv in chunks...
 Processing chunks: 100%|███████████████████████████████████████████████████████████████████████████████| 8/8 [02:54<00:00, 21.79s/it]
 [info] Processing finished in 180.72375059127808 seconds.
@@ -145,6 +143,9 @@ Calculating distances: 100%|█████████████████�
         Page size (bytes): 4096
         Exit status: 0
 ```
+
+
+
 
 ## Conclusions
 
