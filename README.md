@@ -25,10 +25,9 @@ This script is a proof of concept (POC) and is not intended for production use. 
 * The Newick tree (nwk) resulting from the use of float16 in `MSTreeV2.py` cannot be directly compared with the Newick tree obtained from the original `MSTree.py` script.
 * float16 reduces precision, especially in divisions and sorting operations, which may not be as precise.
 
-
 ## Edmonds-Linux Program
 
-The `edmonds-linux` program could potentially be the most performance-limiting aspect of the script. The worst-case scenario for Edmonds' algorithm, when applied to a distance matrix of allelic profiles, involves dense graphs with many nodes (few zeros) and uniform weights. This scenario requires extensive cycle detection and contraction, leading to a time complexity of \( O(N \cdot M) = O(N \cdot N \cdot (N - 1)) = O(N^3) \) and substantial memory usage. This is especially problematic for large biological datasets, a common situation with synthetic data.
+The `edmonds-linux` program could potentially be the most performance-limiting aspect of the script. The worst-case scenario for Edmonds' algorithm, when applied to a distance matrix of allelic profiles, involves dense graphs with many nodes (few zeros) and uniform weights. This scenario requires extensive cycle detection and contraction, leading to a time complexity of `O(N * M) = O(N * N * (N - 1)) = O(N^3)` and substantial memory usage. This is especially problematic for large biological datasets, a common situation with synthetic data.
 
 Efficient cycle detection methods like Tarjan's algorithm can also help avoid the cubic time complexity in most cases.
 
