@@ -144,7 +144,9 @@ Calculating distances: 100%|█████████████████�
         Exit status: 0
 ```
 
+## Image of the resulgint NWK
 
+![](tree.png)
 
 
 ## Conclusions
