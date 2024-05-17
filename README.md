@@ -225,6 +225,7 @@ Calculating distances: 100%|█████████████████�
         Exit status: 0
 ```
 
+Memory used using float32: 38.15 GB
 
 ![](real_tree.png)
 
