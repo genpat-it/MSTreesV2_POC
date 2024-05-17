@@ -25,11 +25,7 @@ This script is a proof of concept (POC) and is not intended for production use. 
 * The Newick tree (nwk) resulting from the use of float16 in `MSTreeV2.py` cannot be directly compared with the Newick tree obtained from the original `MSTree.py` script.
 * float16 reduces precision, especially in divisions and sorting operations, which may not be as precise.
 
-## Edmonds-Linux Program
 
-The `edmonds-linux` program could potentially be the most performance-limiting aspect of the script. The worst-case scenario for Edmonds' algorithm, when applied to a distance matrix of allelic profiles, involves dense graphs with many nodes (few zeros) and uniform weights. This scenario requires extensive cycle detection and contraction, leading to a time complexity of `O(N * M) = O(N * N * (N - 1)) = O(N^3)` and substantial memory usage. This is especially problematic for large biological datasets, a common situation with synthetic data.
-
-Efficient cycle detection methods like Tarjan's algorithm can also help avoid the cubic time complexity in most cases.
 
 
 ## Original Script
@@ -73,13 +69,11 @@ options:
 ```
 
 ## Testing
-- **Dataset**: 80000 samples, 4000 loci
 
-This script generates a dummy matrix of size 80000x4000, with a similarity percentage of 5%. Each allele call is extracted from the same bin that belongs to the locus. Each locus can have up to 10 unique crc32 values.
+This script generates a dummy matrix of size 80000x4000, with a similarity percentage of 30% of the samples and pairwise distances not bigger than 30% of the number of loci.
 
 ```bash
-$ python dummy_generator.py 80000 4000 5 80000x4000_5.tsv
-Dummy dataset with 80000 samples, 4000 columns, and 5% similarity saved to 80000x4000_5.tsv
+$ python dummy_generator.py 80000 4000 20 30 80000x4000_30_20.tsv
 ```
 
 Execute the script with the default `-p` pipeline option, processing in chunks of 10000 rows at a time (`-c`), utilizing 120 cores (`-n`), with data type set to float16 (`-d`), and retaining the temporary files generated during the process (`-k`).
@@ -116,5 +110,45 @@ Calculating distances: 100%|█████████████████�
 [info] _asymmetric method started...
 [info] _asymmetric method finished in 12471.007730722427 seconds.
 [info] _branch_recraft method started...
-
+[info] _branch_recraft method finished in 13733.726621627808 seconds.
+[info] symmetric_link method started...
+[info] symmetric_link method finished in 1.681640863418579 seconds.
+[info] _network2tree method started...
+[info] _network2tree method finished in 0.701179027557373 seconds.
+[info] MSTree method finished in 35047.98455452919 seconds.
+[info] Removing temporary files...
+[info] Process completed in 35368.38639831543 seconds.
+#########################################################
+[info] MSTreesV2 finished at 2024-05-17 09:32:41.959877...
+#########################################################
+        Command being timed: "python MSTreesV2.py -p 80000x4000_30_20.tsv -c 10000 -n 150 -d 32"
+        User time (seconds): 116229.01
+        System time (seconds): 130015.81
+        Percent of CPU this job got: 696%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 9:49:31
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 682338396
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 547353225
+        Minor (reclaiming a frame) page faults: 174643040
+        Voluntary context switches: 597842748
+        Involuntary context switches: 329760
+        Swaps: 0
+        File system inputs: 94246936
+        File system outputs: 1989345920
+        Socket messages sent: 0
+        Socket messages received: 0
+        Signals delivered: 0
+        Page size (bytes): 4096
+        Exit status: 0
 ```
+
+## Conclusions
+
+The `edmonds-linux` program could potentially be the most performance-limiting aspect of the script. The worst-case scenario for Edmonds' algorithm, when applied to a distance matrix of allelic profiles, involves dense graphs with many nodes (few zeros) and uniform weights ( a common situation with synthetic data). This scenario requires extensive cycle detection and contraction, leading to a time complexity of `O(N * M) = O(N * N * (N - 1)) = O(N^3)` and substantial memory usage.
+Efficient cycle detection methods like Tarjan's algorithm can also help avoid the cubic time complexity in most cases.
+
+In the above testing example, the maximum amount of physical memory (RAM) used by the process is about 682 GB, indicating very high memory usage. However, before the edmonds-linux execution, the RAM usage was around 22 GB. It is very likely that this high memory usage is related to the nature of the synthetic data generated.
