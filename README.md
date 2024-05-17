@@ -146,6 +146,8 @@ Calculating distances: 100%|█████████████████�
 
 ## Image of the generated NWK
 
+The image is displayed using the [SPREAD](https://github.com/genpat-it/spread) tool.
+
 ![](tree.png)
 
 
