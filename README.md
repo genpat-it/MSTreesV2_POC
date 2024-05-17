@@ -25,8 +25,7 @@ This script is a proof of concept (POC) and is not intended for production use. 
 * The Newick tree (nwk) resulting from the use of float16 in `MSTreeV2.py` cannot be directly compared with the Newick tree obtained from the original `MSTree.py` script.
 * float16 reduces precision, especially in divisions and sorting operations, which may not be as precise.
 
-
-
+**IMPORTANT: The utilization of float16 data type does not confer any memory-related benefits**
 
 ## Original Script
 The original script can be found at:
