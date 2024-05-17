@@ -18,13 +18,21 @@ This script is a proof of concept (POC) and is not intended for production use. 
 1. **Skip Phases**: Allow the script to skip phases when precomputed `.npy` files (e.g., profiles, names, or distance matrix) are passed.
 2. **Implement Remaining Functions**: Test and update the remaining functions from the original script.
 3. **Validate results**: Especially when float16 dtype is used.
-
+4. **Parallelization**: Maximize parallelization wherever possible (actually implemented only in `get_distance`).
 
 ## Usage of float16 dtype
 * Utilizing float16 as the data type inhibits the just-in-time (JIT) compilation of the `contemporary` method.
 * The Newick tree (nwk) resulting from the use of float16 in `MSTreeV2.py` cannot be directly compared with the Newick tree obtained from the original `MSTree.py` script.
 * float16 reduces precision, especially in divisions and sorting operations, which may not be as precise.
-  
+
+
+## Edmonds-Linux Program
+
+The `edmonds-linux` program could potentially be the most performance-limiting aspect of the script. The worst-case scenario for Edmonds' algorithm, when applied to a distance matrix of allelic profiles, involves dense graphs with many nodes (few zeros) and uniform weights. This scenario requires extensive cycle detection and contraction, leading to a time complexity of \( O(N \cdot M) = O(N \cdot N \cdot (N - 1)) = O(N^3) \) and substantial memory usage. This is especially problematic for large biological datasets, a common situation with synthetic data.
+
+Efficient cycle detection methods like Tarjan's algorithm can also help avoid the cubic time complexity in most cases.
+
+
 ## Original Script
 The original script can be found at:
 - [MSTrees.py](https://github.com/achtman-lab/GrapeTree/blob/master/module/MSTrees.py)
@@ -78,39 +86,36 @@ Dummy dataset with 80000 samples, 4000 columns, and 5% similarity saved to 80000
 Execute the script with the default `-p` pipeline option, processing in chunks of 10000 rows at a time (`-c`), utilizing 120 cores (`-n`), with data type set to float16 (`-d`), and retaining the temporary files generated during the process (`-k`).
 
 ```bash
-$ /usr/bin/time -v python MSTreesV2.py -p 80000x4000_5.tsv -c 10000 -n 120 -d 16 -k
+$ /usr/bin/time -v python MSTreesV2.py -p 80000x4000_30_20.tsv -c 10000 -n 120 -d 16 -k
 
+(310) [a.deruvo@gtc-collab-int Thu May 16 23:42:24 github]$ /usr/bin/time -v python MSTreesV2.py -p 80000x4000_30_20.tsv -c 10000 -n 150 -d 32
 #########################################################
 ####       !!! DON'T USE IN PRODUCTION !!!       ########
 #########################################################
-[info] MSTreesV2 started at 2024-05-16 17:24:18.926149...
+[info] MSTreesV2 started at 2024-05-16 23:43:13.579159...
 #########################################################
-[info] 80000x4000_5.tsv has 80000 rows and 4000 columns.
+[info] 80000x4000_30_20.tsv has 80000 rows and 4000 columns.
 [info] The chunk size is set to 10000.
-[info] The profile file will be saved in tmp6zevps6_.prof.npy.
-[info] The names file will be saved in tmp6zevps6_.names.npy.
-[info] The distance file will be saved in tmp6zevps6_.dist.npy.
-[info] The distance file for edmonds will be saved in tmp6zevps6_.dist.list
-[info] The nwk file be saved in tmp6zevps6_.nwk
-[info] Processing 80000x4000_5.tsv in chunks...
-[info] Chunk 0 processed with shape (10000, 4000)
-[info] Chunk 1 processed with shape (10000, 4000)
-[info] Chunk 2 processed with shape (10000, 4000)
-[info] Chunk 3 processed with shape (10000, 4000)
-[info] Chunk 4 processed with shape (10000, 4000)
-[info] Chunk 5 processed with shape (10000, 4000)
-[info] Chunk 6 processed with shape (10000, 4000)
-[info] Chunk 7 processed with shape (10000, 4000)
-[info] Processing finished in 186.30022048950195 seconds.
+[info] The profile file will be saved in /home/IZSNT/a.deruvo/MSTrees_fork/github/tmpvtqulnja.prof.npy.
+[info] The names file will be saved in /home/IZSNT/a.deruvo/MSTrees_fork/github/tmpvtqulnja.names.npy.
+[info] The distance file will be saved in /home/IZSNT/a.deruvo/MSTrees_fork/github/tmpvtqulnja.dist.npy.
+[info] The distance file for edmonds will be saved in /home/IZSNT/a.deruvo/MSTrees_fork/github/tmpvtqulnja.dist.list
+[info] The nwk file will be saved in /home/IZSNT/a.deruvo/MSTrees_fork/github/tmpvtqulnja.nwk
+[info] Processing 80000x4000_30_20.tsv in chunks...
+Processing chunks: 100%|███████████████████████████████████████████████████████████████████████████████| 8/8 [02:54<00:00, 21.79s/it]
+[info] Processing finished in 180.72375059127808 seconds.
 [info] nonredundant method started...
-[info] nonredundant method finished in 142.98293256759644 seconds.
-[info] New shape of profiles: (76001, 4000)
-[info] New shape of names: (76001,)
+[info] nonredundant method finished in 128.9532024860382 seconds.
+[info] New shape of profiles: (63966, 4000)
+[info] New shape of names: (63966,)
 [info] MSTree method started...
 [info] get_distance method started...
-[info] get_distance method finished in 17187.455489873886 seconds.
+Calculating distances: 100%|█████████████████████████████████████████████████████████████████████| 150/150 [2:25:10<00:00, 58.07s/it]
+[info] get_distance method finished in 8712.560944795609 seconds.
 [info] harmonic method started...
-[info] harmonic method finished in 406.2505991458893 seconds.
+[info] harmonic method finished in 126.75932931900024 seconds.
 [info] _asymmetric method started...
+[info] _asymmetric method finished in 12471.007730722427 seconds.
+[info] _branch_recraft method started...
 
 ```
