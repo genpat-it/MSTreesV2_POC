@@ -148,7 +148,7 @@ Calculating distances: 100%|█████████████████�
 
 The image is displayed using the [SPREAD](https://github.com/genpat-it/spread) tool.
 
-![](tree.png)
+![](synthetic_tree.png)
 
 
 ## Conclusions
@@ -157,3 +157,75 @@ The `edmonds-linux` program could potentially be the most performance-limiting a
 Efficient cycle detection methods like Tarjan's algorithm can also help avoid the cubic time complexity in most cases.
 
 In the above testing example, the maximum amount of physical memory (RAM) used by the process is about 682 GB, indicating very high memory usage. However, before the edmonds-linux execution, the RAM usage was around 22 GB. It is very likely that this high memory usage is related to the nature of the synthetic data generated.
+
+## Real Dataset
+
+```bash
+$ /usr/bin/time -v python MSTreesV2.py -p real_dataset.tsv -c 10000 -n 120 -d 32 -k
+#########################################################
+####       !!! DON'T USE IN PRODUCTION !!!       ########
+#########################################################
+[info] MSTreesV2 started at 2024-05-17 10:12:27.318310...
+#########################################################
+[info] real_dataset.tsv has 54783 rows and 7643 columns.
+[info] The chunk size is set to 10000.
+[info] The profile file will be saved in /MSTrees_fork/github/tmpvnxecue7.prof.npy.
+[info] The names file will be saved in /MSTrees_fork/github/tmpvnxecue7.names.npy.
+[info] The distance file will be saved in /MSTrees_fork/github/tmpvnxecue7.dist.npy.
+[info] The distance file for edmonds will be saved in /MSTrees_fork/github/tmpvnxecue7.dist.list
+[info] The nwk file will be saved in /MSTrees_fork/github/tmpvnxecue7.nwk
+[info] Processing real_dataset.tsv in chunks...
+Processing chunks: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 6/6 [03:45<00:00, 37.56s/it]
+[info] Processing finished in 234.7057967185974 seconds.
+[info] nonredundant method started...
+[info] nonredundant method finished in 130.54289841651917 seconds.
+[info] New shape of profiles: (27695, 7643)
+[info] New shape of names: (27695,)
+[info] MSTree method started...
+[info] get_distance method started...
+Calculating distances: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 120/120 [58:51<00:00, 29.43s/it]
+[info] get_distance method finished in 3537.0775895118713 seconds.
+[info] harmonic method started...
+[info] harmonic method finished in 13.572845697402954 seconds.
+[info] _asymmetric method started...
+[info] _asymmetric method finished in 42.826945543289185 seconds.
+[info] _branch_recraft method started...
+[info] _branch_recraft method finished in 109.54710674285889 seconds.
+[info] symmetric_link method started...
+[info] symmetric_link method finished in 0.9602999687194824 seconds.
+[info] _network2tree method started...
+[info] _network2tree method finished in 0.40360546112060547 seconds.
+[info] MSTree method finished in 3704.8224573135376 seconds.
+[info] Process completed in 4075.650115251541 seconds.
+#########################################################
+[info] MSTreesV2 finished at 2024-05-17 11:20:22.962614...
+#########################################################
+        Command being timed: "python MSTreesV2.py -p real_dataset.tsv -c 10000 -n 120 -d 32 -k"
+        User time (seconds): 26711.64
+        System time (seconds): 74722.19
+        Percent of CPU this job got: 2476%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 1:08:16
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 38159880
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 291000613
+        Minor (reclaiming a frame) page faults: 48633918
+        Voluntary context switches: 164289437
+        Involuntary context switches: 94208
+        Swaps: 0
+        File system inputs: 48054384
+        File system outputs: 609367192
+        Socket messages sent: 0
+        Socket messages received: 0
+        Signals delivered: 0
+        Page size (bytes): 4096
+        Exit status: 0
+```
+
+
+![](real_tree.png)
+
+
