@@ -10,6 +10,11 @@ import sys, os, tempfile, platform, re, tempfile
 import time
 from datetime import datetime
 import multiprocessing
+from multiprocessing import Pool
+from tqdm import tqdm
+import warnings
+from numba.core.errors import NumbaPendingDeprecationWarning
+warnings.filterwarnings("ignore", category=NumbaPendingDeprecationWarning)
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -110,7 +115,7 @@ def parallel_distance(callup) :
 
 class distance_matrix(object) :
     @staticmethod
-    def get_distance(func):
+    def get_distance2(func):
         int_time = time.time()
         print(f"[info] get_distance method started...")
         from multiprocessing import Pool
@@ -125,6 +130,26 @@ class distance_matrix(object) :
             del pool
         else:
             [parallel_distance([func, [0, n_profile]])]
+        res.flush()
+        print(f"[info] get_distance method finished in {time.time() - int_time} seconds.")
+        return res
+    
+    @staticmethod
+    def get_distance(func):
+        int_time = time.time()
+        print(f"[info] get_distance method started...")
+        n_profile = params['rows']
+        n_proc = min(int(params['n_proc']), n_profile)
+        res = np.memmap(params['dist_file'], dtype=params['dtype'], mode='w+', shape=(params['rows'], params['rows']))
+        indices = np.array([[n_profile * v / n_proc + 0.5, n_profile * (v + 1) / n_proc + 0.5] for v in np.arange(n_proc, dtype=float)], dtype=int)
+        if n_proc > 1:
+            with Pool(n_proc) as pool:
+                for _ in tqdm(pool.imap(parallel_distance, [[func, idx] for idx in indices]), total=len(indices), desc="Calculating distances"):
+                    pass
+        else:
+            for _ in tqdm([parallel_distance([func, [0, n_profile]])], total=1, desc="Calculating distances"):
+                pass
+
         res.flush()
         print(f"[info] get_distance method finished in {time.time() - int_time} seconds.")
         return res
@@ -175,7 +200,7 @@ class methods(object):
     def _asymmetric(weight, **params) :
         int_time = time.time()
         print(f"[info] _asymmetric method started...")
-        dist = np.memmap(params['dist_file'], dtype=params['dtype'], mode='r', shape=(params['rows'], params['rows']))
+        dist = np.memmap(params['dist_file'], dtype=params['dtype'], mode='r+', shape=(params['rows'], params['rows']))
         if params['dtype'] == np.float16:
             int_dtype = np.int16
         else:
@@ -207,7 +232,7 @@ class methods(object):
             with open(dist_file, 'w') as fout :
                 for d in dist :
                     fout.write('{0}\n'.format('\t'.join(['{0:.5f}'.format(dd) for dd in (d+(1.-0.000005)) ])))
-            del d
+            del d, dist
             mstree = Popen([params['edmonds_' + platform.system()], dist_file], stdout=PIPE).communicate()[0]
             if isinstance(mstree, bytes) :
                 mstree = mstree.decode('utf8')
@@ -436,14 +461,14 @@ def backend(**args) :
     names = np.memmap(params['names_file'], dtype='<U100', mode='w+', shape=(params['rows'],))
     chunk_count = 0
     
-    for names_chunk, profiles_chunk in profiles_generator(params['fname'], params['chunk_size'], params['sep']):
+    total_chunks = (params['rows'] + params['chunk_size'] - 1) // params['chunk_size']
+    for names_chunk, profiles_chunk in tqdm(profiles_generator(params['fname'], params['chunk_size'], params['sep']), total=total_chunks, desc="Processing chunks"):
         profiles_chunk = np.array(profiles_chunk)
         names_chunk = np.array(names_chunk)
         start = chunk_count * params['chunk_size']
         end = start + len(profiles_chunk)
         profiles[start:end] = profiles_chunk
         names[start:end] = names_chunk
-        print(f"[info] Chunk {chunk_count} processed with shape {profiles_chunk.shape}")
         chunk_count += 1
 
     profiles.flush()
