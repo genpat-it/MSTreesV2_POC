@@ -1,5 +1,5 @@
+MSTrees.py
 *.tsv
 *.npy
-tmp*
 *.list
-MSTrees.py
+tmp*
