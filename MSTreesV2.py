@@ -209,7 +209,7 @@ class methods(object):
 
         for start in range(0, n_rows, chunk_size):
             end = min(start + chunk_size, n_rows)
-            dist_temp[start:end, :] = np.round(dist[start:end, :], 0) + weight[start:end].reshape([-1, 1])
+            dist_temp[start:end, :] = np.round(dist[start:end, :], 0) + weight[start:end].reshape([weight.size, 1])
             
         for start in range(0, n_rows, chunk_size):
             end = min(start + chunk_size, n_rows)
@@ -219,6 +219,7 @@ class methods(object):
             end = min(start + chunk_size, n_rows)
             dist_chunk = dist_temp[start:end, :]
             dist_temp[start:end, :] = np.minimum(dist_chunk, dist_chunk.T)
+        
         try:
             g = nx.Graph(dist_temp)
             ms = nx.minimum_spanning_tree(g)
@@ -446,6 +447,96 @@ def nonredundant(names, profiles) :
     print(f"[info] nonredundant method finished in {time.time() - int_time} seconds.")
     return new_names, new_profiles, embeded
 
+
+def nonredundant_dist2() :
+    int_time = time.time()
+    print(f"[info] nonredundant_dist method started...")
+    names = np.memmap(params['names_file'], dtype='<U100', mode='r', shape=(params['rows'],))
+    dist = np.memmap(params['dist_file'], dtype=params['dtype'], mode='r', shape=(params['rows'], params['columns']))
+    unique_rows, uniqueness = np.unique(dist, axis=0, return_inverse=True)
+    embeded_group = {}
+    for name, unique_idx in zip(names, uniqueness):
+        unique_row = unique_rows[unique_idx].tobytes()
+        if unique_row not in embeded_group:
+            embeded_group[unique_row] = [name]
+        else:
+            embeded_group[unique_row].append(name)
+    embeded = {value[0]: value for value in embeded_group.values()}
+    new_names = np.array(list(embeded.keys()))
+    name_to_index = {name: idx for idx, name in enumerate(names)}
+    new_indices = [name_to_index[name] for name in new_names]
+    new_dist = dist[np.ix_(new_indices, new_indices)]
+    names_memmap = np.memmap(params['names_file'], dtype='<U100', mode='w+', shape=(len(new_names),))
+    names_memmap[:] = new_names[:]
+    names_memmap.flush()
+    dist_memmap = np.memmap(params['dist_file'], dtype=params['dtype'], mode='w+', shape=(len(new_names), len(new_names)))
+    dist_memmap[:] = new_dist[:]
+    dist_memmap.flush()
+    print(f"[info] nonredundant_dist method finished in {time.time() - int_time} seconds.")
+    return new_dist.shape[0], new_dist.shape[1], embeded
+
+def nonredundant_dist():
+    int_time = time.time()
+    print(f"[info] nonredundant_dist method started...")
+
+    chunk_size = params['chunk_size']
+    total_rows = params['rows']
+    total_columns = params['columns']
+
+    names = np.memmap(params['names_file'], dtype='<U100', mode='r', shape=(total_rows,))
+    dist = np.memmap(params['dist_file'], dtype=params['dtype'], mode='r', shape=(total_rows, total_columns))
+    
+    unique_rows_set = set()
+    uniqueness_list = []
+
+    # Process the distance matrix in chunks
+    for start in range(0, total_rows, chunk_size):
+        end = min(start + chunk_size, total_rows)
+        chunk_dist = dist[start:end]
+        
+        # Find unique rows in the current chunk
+        chunk_unique_rows, chunk_uniqueness = np.unique(chunk_dist, axis=0, return_inverse=True)
+        
+        # Add chunk's unique rows to the global set
+        for row in chunk_unique_rows:
+            unique_rows_set.add(tuple(row))
+
+        # Append the uniqueness indices to the global list
+        uniqueness_list.extend(chunk_uniqueness + len(unique_rows_set) - len(chunk_unique_rows))
+
+    unique_rows = np.array(list(unique_rows_set))
+    uniqueness = np.array(uniqueness_list)
+
+    # Regroup nodes based on unique rows
+    embeded_group = {}
+    for name, unique_idx in zip(names, uniqueness):
+        unique_row = unique_rows[unique_idx].tobytes()
+        if unique_row not in embeded_group:
+            embeded_group[unique_row] = [name]
+        else:
+            embeded_group[unique_row].append(name)
+
+    embeded = {value[0]: value for value in embeded_group.values()}
+    new_names_list = list(embeded.keys())
+    new_names = np.array(new_names_list)
+    
+    name_to_index = {name: idx for idx, name in enumerate(names)}
+    new_indices = [name_to_index[name] for name in new_names]
+    new_dist_memmap = np.memmap(params['dist_file'], dtype=params['dtype'], mode='r+', shape=(len(new_names), len(new_names)))
+
+    for i, new_idx in enumerate(new_indices):
+        for j, new_idx2 in enumerate(new_indices):
+            new_dist_memmap[i, j] = dist[new_idx, new_idx2]
+    new_dist_memmap.flush()
+
+    names_memmap = np.memmap(params['names_file'], dtype='<U100', mode='w+', shape=(len(new_names),))
+    names_memmap[:] = new_names[:]
+    names_memmap.flush()
+
+    print(f"[info] nonredundant_dist method finished in {time.time() - int_time} seconds.")
+    return new_dist_memmap.shape[0], new_dist_memmap.shape[1], embeded
+
+
 def process_distance_chunk(chunk, start_idx):
     names = np.memmap(params['names_file'], dtype='<U100', mode='r+', shape=(params['rows'],))
     dist = np.memmap(params['dist_file'], dtype=params['dtype'], mode='r+', shape=(params['rows'], params['rows']))
@@ -513,20 +604,9 @@ def backend(**args) :
         names = np.memmap(params['names_file'], dtype='<U100', mode='w+', shape=(params['rows'],))
         dist = np.memmap(params['dist_file'], dtype=params['dtype'], mode='w+', shape=(params['rows'], params['rows']))
         load_distance_matrix()
-        unique_rows, indices = np.unique(dist, axis=0, return_inverse=True)
-        params['rows'] = len(unique_rows)
-        result_dict = {}
-        for idx, name in zip(indices, names):
-            unique_key = unique_rows[idx].tobytes()
-            if unique_key not in result_dict:
-                result_dict[unique_key] = [name]
-            else:
-                result_dict[unique_key].append(name)
-        embeded = {value[0]: value for value in result_dict.values()}
-        names = np.memmap(params['names_file'], dtype='<U100', mode='r+', shape=(params['rows'],))
-        for i, key in enumerate(embeded.keys()):
-            names[i] = key
-        names.flush()
+        rows, columns, embeded = nonredundant_dist()
+        params['rows'] = rows
+        params['columns'] = columns
     else:
         print(f"[info] The profile file will be saved in {params['prof_file']}.")
         print(f"[info] The names file will be saved in {params['names_file']}.")
@@ -561,6 +641,7 @@ def backend(**args) :
         params['rows'] = profiles.shape[0]
         params['columns'] = profiles.shape[1]
         
+    dist = np.memmap(params['dist_file'], mode='r', dtype=np.float32, shape=(params['rows'],params['rows']))
     tre = eval('methods.' + params['method'])(embeded, **params)
     maxDist = 0.
     for node in tre.iter_descendants() :
